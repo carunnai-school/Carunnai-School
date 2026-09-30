@@ -42,9 +42,9 @@
 window.CARUNNAI_GALLERY = {
   // false = show the photos stored in the website (assets/img/gallery)
   // true  = load albums from Google Drive (needs apiKey below)
-  useDrive: false,
+  useDrive: true,
 
-  apiKey: "",            // e.g. "AIzaSy..."
+  apiKey: "AIzaSyAdRXSuXrANWKpn1b-mlVwUXcBn0370LW8",
   rootFolderId: "1c_Zj5CoEHKBWo1vYsDFbPAzTlR2UlW5w",
 
   // "drive+local" = Drive albums first, then the built-in photos
