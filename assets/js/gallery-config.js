@@ -40,6 +40,10 @@
      are shown instead, so the page is never blank.
    ===================================================================== */
 window.CARUNNAI_GALLERY = {
+  // false = show the photos stored in the website (assets/img/gallery)
+  // true  = load albums from Google Drive (needs apiKey below)
+  useDrive: false,
+
   apiKey: "",            // e.g. "AIzaSy..."
   rootFolderId: "1c_Zj5CoEHKBWo1vYsDFbPAzTlR2UlW5w",
 

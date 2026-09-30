@@ -111,7 +111,7 @@
   function driveFallback(id, w) { return "https://drive.google.com/thumbnail?id=" + id + "&sz=w" + w; }
 
   function loadDrive() {
-    if (!CFG.apiKey || !CFG.rootFolderId) return Promise.reject(new Error("not configured"));
+    if (CFG.useDrive === false || !CFG.apiKey || !CFG.rootFolderId) return Promise.reject(new Error("not configured"));
     var cacheKey = "carunnai-drive-" + CFG.rootFolderId;
     try {
       var cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
