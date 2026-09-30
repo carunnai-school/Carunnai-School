@@ -10,9 +10,10 @@
   var LOCAL_ALBUMS = [
     { id: "skills", name: "Vocational Skills" },
     { id: "class", name: "Classroom Learning" },
-    { id: "events", name: "Events & Celebrations" },
+    { id: "events", name: "Festivals & Celebrations" },
+    { id: "independence", name: "Independence Day" },
     { id: "guests", name: "Guests & Well-wishers" },
-    { id: "outings", name: "Outings" }
+    { id: "outings", name: "Outings & Trips" }
   ];
   var LOCAL = [
     [1, "outings", "Students and staff on an outing with the hills behind them"],
@@ -51,12 +52,12 @@
     [34, "guests", "A guest meeting the children"],
     [35, "guests", "Visitors and staff together"],
     [36, "events", "Students seated for a celebration"],
-    [37, "events", "Proudly holding the national flag"],
+    [37, "independence", "Proudly holding the national flag"],
     [38, "guests", "Visitors with the school team"],
-    [39, "events", "Independence Day celebration in the hall"],
+    [39, "independence", "Independence Day celebration in the hall"],
     [40, "guests", "A guest welcomed with flowers"],
-    [41, "events", "Independence Day parade under the trees"],
-    [42, "events", "Flag bearers leading the celebration"],
+    [41, "independence", "Independence Day parade under the trees"],
+    [42, "independence", "Flag bearers leading the celebration"],
     [43, "guests", "Guests visiting the school"],
     [44, "outings", "A trip to the waterfall"],
     [45, "outings", "A day out under the trees"],

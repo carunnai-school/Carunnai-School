@@ -134,30 +134,6 @@
     });
   });
 
-  /* ---------- Contact form → email ---------- */
-  var form = $("#enquiry-form");
-  if (form) {
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      if (!form.reportValidity()) return;
-      var f = new FormData(form);
-      var topic = f.get("topic") || "General enquiry";
-      var lines = [
-        "Name: " + (f.get("name") || ""),
-        "Phone: " + (f.get("phone") || ""),
-        "Email: " + (f.get("email") || ""),
-        f.get("age") ? "Child's age: " + f.get("age") : "",
-        "",
-        f.get("message") || ""
-      ].filter(function (l, idx) { return l !== "" || idx === 4; });
-      var href = "mailto:carunnai@gmail.com?subject=" + encodeURIComponent("Website enquiry – " + topic) +
-        "&body=" + encodeURIComponent(lines.join("\n"));
-      window.location.href = href;
-      var note = $(".form-note", form);
-      if (note) note.textContent = "Your email app should open with the message ready to send. If it doesn't, please email carunnai@gmail.com or call +91 94436 32645.";
-    });
-  }
-
   /* ---------- Year ---------- */
   $$("[data-year]").forEach(function (el) { el.textContent = new Date().getFullYear(); });
 })();
