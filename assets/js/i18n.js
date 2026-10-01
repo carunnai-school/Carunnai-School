@@ -45,6 +45,8 @@
 
   var PHOTO = { ta: function (n) { return n + " புகைப்படங்கள்"; }, hi: function (n) { return n + " तस्वीरें"; } };
   var OPEN = { ta: "புகைப்படத்தைத் திற: ", hi: "तस्वीर खोलें: " };
+  var VIDEO = { ta: function (n) { return n + " காணொளிகள்"; }, hi: function (n) { return n + " वीडियो"; } };
+  var PLAY = { ta: "காணொளியை இயக்கு: ", hi: "वीडियो चलाएँ: " };
 
   function norm(s) { return s.replace(/\s+/g, " ").trim(); }
   function lookup(s) {
@@ -53,8 +55,12 @@
     if (DICT.hasOwnProperty(k)) return DICT[k];
     var m = k.match(/^(\d+) photos?$/);
     if (m) return PHOTO[lang](m[1]);
+    m = k.match(/^(\d+) videos?$/);
+    if (m) return VIDEO[lang](m[1]);
     m = k.match(/^Open photo: (.+)$/);
     if (m) return OPEN[lang] + (DICT[m[1]] || m[1]);
+    m = k.match(/^Play video: (.+)$/);
+    if (m) return PLAY[lang] + (DICT[m[1]] || m[1]);
     return null;
   }
 

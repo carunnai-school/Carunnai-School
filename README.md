@@ -13,7 +13,7 @@ Live: https://carunnai-school.github.io/Carunnai-School/
 | `about.html` | About Us – story, journey, mission & vision, founders, team |
 | `our-home.html` | Our Home – residential care |
 | `programmes.html` | Programmes – age tabs, therapies, skills |
-| `gallery.html` | Gallery – photo albums from Google Drive |
+| `gallery.html` | Gallery – photo albums from |
 | `get-involved.html` | Donate, sponsor, volunteer, give in kind, wish list |
 | `faq.html` | Frequently asked questions |
 | `contact.html` | Address, phone, email, admission steps, map |
@@ -25,8 +25,9 @@ Live: https://carunnai-school.github.io/Carunnai-School/
 assets/
   css/style.css            all styles (light "storybook" theme)
   js/main.js               menu, scroll animations, counters, tabs, FAQ
-  js/gallery.js            gallery albums, filters, photo viewer
-  js/gallery-config.js     Google Drive settings  <- edit this
+  js/gallery.js            gallery albums, photo/video filter, viewer, video player
+  js/hostel.js             home page hostel photos
+  js/gallery-config.js     settings  <- edit this
   js/i18n.js               English / Tamil / Hindi switcher
   js/i18n-dict.js          all Tamil + Hindi translations
   img/gallery/g01–g49.jpg  photos (full size, used in the photo viewer)
@@ -40,7 +41,9 @@ assets/
 The gallery reads albums straight from the shared Drive folder
 **"Carunnai Webpage Content"**. Each sub-folder = one album.
 
-- **Add photos:** upload to a sub-folder.
+- **Add photos or videos:** upload to a sub-folder (JPG/PNG photos, MP4 videos).
+  Videos get a ▶ play button and open in a video player; visitors can switch
+  between **All / Photos / Videos**.
 - **New album:** create a new sub-folder (newest folder shows first).
 - **Remove:** delete in Drive.
 - **Caption:** in Drive, right-click the photo → File information → Details → *Description*.
@@ -50,13 +53,20 @@ Changes show on the site within about 5 minutes. No code change or push is neede
 Settings are in `assets/js/gallery-config.js`:
 
 - `useDrive: true` – load from Drive. `false` = use the photos in `assets/img/gallery`.
-- `apiKey` – Google Cloud API key. It is restricted to the Google Drive API and to these websites:
+- `apiKey` – Google Cloud API key. It is restricted to the API and to these websites:
   `carunnai-school.github.io/*`, `carunnaispecialachoolandhome.in/*`,
   `*.carunnaispecialachoolandhome.in/*`, `localhost/*`.
   If the site moves to a new address, add it to the key's website list.
 - `rootFolderId` – ID of the main Drive folder.
 
 If Drive can't be reached, the built-in photos are shown, so the page is never empty.
+
+## Home page – "Our hostel"
+
+The hostel section on the home page shows the latest 4 photos from the
+folder whose name contains **Hostel** (`assets/js/hostel.js`). The
+"Watch hostel videos" button opens `gallery.html#album=hostel&type=video`.
+Facility list is in `index.html` (section `id="hostel"`).
 
 ## Languages
 

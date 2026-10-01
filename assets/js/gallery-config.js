@@ -1,7 +1,7 @@
 /* =====================================================================
-   GOOGLE DRIVE GALLERY — SETTINGS
+   GALLERY — SETTINGS
    ---------------------------------------------------------------------
-   Photos uploaded to Google Drive show up on gallery.html automatically.
+   Photos uploaded to show up on gallery.html automatically.
    Each sub-folder inside the main folder becomes one album (filter button).
 
    Drive layout example:
@@ -19,13 +19,13 @@
       and paste it into rootFolderId below.
    3. Create a free API key:
         console.cloud.google.com > create a project >
-        "APIs & Services" > Library > enable "Google Drive API" >
+        "APIs & Services" > Library > enable "API" >
         Credentials > Create credentials > API key.
       Then edit the key:
         Application restrictions > Websites >
           add  carunnaispecialachoolandhome.in  followed by  /  and  *
           (for local testing also add  localhost  with the same ending)
-        API restrictions > Restrict key > Google Drive API.
+        API restrictions > Restrict key > API.
       Paste the key into apiKey below.
    4. Upload the site. New photos appear on the next page load
       (after up to cacheMinutes, per visitor).
@@ -41,7 +41,7 @@
    ===================================================================== */
 window.CARUNNAI_GALLERY = {
   // false = show the photos stored in the website (assets/img/gallery)
-  // true  = load albums from Google Drive (needs apiKey below)
+  // true  = load albums from (needs apiKey below)
   useDrive: true,
 
   apiKey: "AIzaSyAdRXSuXrANWKpn1b-mlVwUXcBn0370LW8",

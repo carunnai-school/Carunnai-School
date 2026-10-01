@@ -687,3 +687,41 @@ html[lang="ta"] .note-card, html[lang="hi"] .note-card { font-size: 1.1rem; }
 html[lang="ta"] .sticker, html[lang="hi"] .sticker { font-size: .95rem !important; }
 
 .main-nav .nav-extra .btn-primary { color: #fff; }
+
+/* ---------- Hostel section (home) ---------- */
+.facilities { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 18px; }
+.facilities li { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 14px; font-weight: 700; color: var(--ink); font-size: .98rem; transition: transform .25s var(--ease), border-color .25s; }
+.facilities li:hover { transform: translateX(4px); border-color: var(--c); }
+.facilities .ic { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--t); color: var(--d); }
+.facilities .ic .icon { width: 20px; height: 20px; }
+@media (max-width: 520px) { .facilities { grid-template-columns: 1fr; } }
+.hostel-pics { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 20px; padding: 16px 6px; max-width: 540px; margin-inline: auto; }
+.hostel-pics .polaroid img { aspect-ratio: 4 / 3; }
+.hostel-pics .h1 { --r: -4deg; } .hostel-pics .h2 { --r: 3deg; margin-top: 22px; }
+.hostel-pics .h3 { --r: 2deg; } .hostel-pics .h4 { --r: -3deg; margin-top: -10px; }
+@media (max-width: 520px) { .hostel-pics { gap: 18px 12px; } }
+
+/* ---------- Gallery: photo / video switch ---------- */
+.type-filter { display: inline-flex; gap: 4px; padding: 5px; margin-bottom: 18px; background: var(--card); border: 2px solid var(--ink); border-radius: 16px; box-shadow: 3px 3px 0 var(--ink); }
+.type-filter[hidden] { display: none; }
+.type-filter button { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 11px; font-weight: 800; color: var(--ink-2); transition: background-color .2s, color .2s; }
+.type-filter button .count { font-size: .78rem; padding: 1px 8px; border-radius: 999px; background: var(--paper-2); color: var(--muted); }
+.type-filter button:hover:not(:disabled) { background: var(--paper-2); }
+.type-filter button[aria-pressed="true"] { background: var(--sun); color: var(--ink); }
+.type-filter button[aria-pressed="true"] .count { background: #fff; color: var(--ink); }
+.type-filter button:disabled { opacity: .45; cursor: not-allowed; }
+@media (max-width: 520px) { .type-filter { display: flex; } .type-filter button { flex: 1; justify-content: center; padding: 9px 8px; } }
+.album-title .dot-sep { color: var(--muted); }
+
+.tile.is-video { cursor: pointer; }
+.tile .play {
+  position: absolute; left: 50%; top: calc(50% - 22px); width: 64px; height: 64px; transform: translate(-50%, -50%);
+  border-radius: 50%; background: rgba(255, 253, 249, .95); color: var(--terra-7); display: grid; place-items: center;
+  border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); transition: transform .3s var(--ease);
+}
+.tile .play svg { width: 30px; height: 30px; margin-left: 3px; }
+.tile:hover .play { transform: translate(-50%, -50%) scale(1.12); }
+.tile .dur { position: absolute; right: 18px; top: 18px; background: rgba(40, 32, 28, .85); color: #fff; font-size: .78rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; letter-spacing: .03em; }
+
+.lb-video { display: block; max-width: 100%; max-height: 100%; border: 10px solid #fff; border-radius: 4px; background: #000; box-shadow: 0 30px 80px rgba(0, 0, 0, .45); }
+.lb-video[hidden], #lb-img[hidden] { display: none; }

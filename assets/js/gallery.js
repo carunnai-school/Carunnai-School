@@ -74,6 +74,8 @@
   var albums = [];   // {id, name}
   var photos = [];   // {thumb, full, album, alt, fallback?}
   var current = "all";
+  var currentType = "all";
+  var typesEl = $("#gal-types");
   var shown = 0;
   var list = [];     // filtered
   var grid = $("#gal-grid"), filtersEl = $("#gal-filters"), statusEl = $("#gal-status"), moreBtn = $("#gal-more"), titleEl = $("#gal-album-title");
@@ -88,7 +90,7 @@
     function page(token) {
       var url = API + "?q=" + encodeURIComponent(q) +
         "&key=" + encodeURIComponent(CFG.apiKey) +
-        "&fields=" + encodeURIComponent("nextPageToken,files(id,name,description,createdTime)") +
+        "&fields=" + encodeURIComponent("nextPageToken,files(id,name,description,createdTime,mimeType,videoMediaMetadata(width,height,durationMillis))") +
         "&orderBy=" + encodeURIComponent(order) +
         "&pageSize=1000&supportsAllDrives=true&includeItemsFromAllDrives=true" +
         (token ? "&pageToken=" + encodeURIComponent(token) : "");
@@ -113,14 +115,14 @@
 
   function loadDrive() {
     if (CFG.useDrive === false || !CFG.apiKey || !CFG.rootFolderId) return Promise.reject(new Error("not configured"));
-    var cacheKey = "carunnai-drive-" + CFG.rootFolderId;
+    var cacheKey = "carunnai-drive-v2-" + CFG.rootFolderId;
     try {
       var cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
       if (cached && Date.now() - cached.t < (CFG.cacheMinutes || 10) * 60000) return Promise.resolve(cached.d);
     } catch (e) { /* storage unavailable */ }
 
     var order = CFG.albumOrder === "name" ? "name" : CFG.albumOrder === "oldest" ? "createdTime" : "createdTime desc";
-    var imgQ = function (parent) { return "'" + parent + "' in parents and mimeType contains 'image/' and trashed = false"; };
+    var imgQ = function (parent) { return "'" + parent + "' in parents and (mimeType contains 'image/' or mimeType contains 'video/') and trashed = false"; };
     var folderQ = "'" + CFG.rootFolderId + "' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
 
     return driveList(folderQ, order).then(function (folders) {
@@ -138,9 +140,14 @@
         var aid = "drive-" + r.folder.id;
         d.albums.push({ id: aid, name: r.folder.name, drive: true });
         r.files.forEach(function (f) {
+          var isVideo = /^video\//.test(f.mimeType || "");
+          var vm = f.videoMediaMetadata || {};
           d.photos.push({
+            type: isVideo ? "video" : "photo",
             thumb: driveImage(f.id, 640), full: driveImage(f.id, 1920),
             thumbFb: driveFallback(f.id, 640), fullFb: driveFallback(f.id, 1920),
+            embed: isVideo ? "https://drive.google.com/file/d/" + f.id + "/preview" : null,
+            w: +vm.width || 0, h: +vm.height || 0, dur: +vm.durationMillis || 0,
             album: aid, alt: niceCaption(f, r.folder.name)
           });
         });
@@ -174,20 +181,41 @@
     });
   }
 
+  function buildTypes() {
+    if (!typesEl) return;
+    var inAlbum = current === "all" ? photos : photos.filter(function (p) { return p.album === current; });
+    var nv = inAlbum.filter(function (p) { return p.type === "video"; }).length;
+    var anyVideo = photos.some(function (p) { return p.type === "video"; });
+    typesEl.hidden = !anyVideo;
+    if (!anyVideo) { currentType = "all"; return; }
+    var opts = [["all", "All", inAlbum.length, "grid"], ["photo", "Photos", inAlbum.length - nv, "image"], ["video", "Videos", nv, "play"]];
+    typesEl.innerHTML = opts.map(function (o) {
+      return '<button type="button" data-type="' + o[0] + '" aria-pressed="' + (currentType === o[0]) + '"' + (o[2] ? "" : " disabled") + '>' +
+        '<svg class="icon" aria-hidden="true"><use href="#i-' + o[3] + '"/></svg><span>' + o[1] + '</span> <span class="count">' + o[2] + "</span></button>";
+    }).join("");
+  }
   function select(id, updateHash) {
     if (id !== "all" && !albumName(id)) id = "all";
     current = id;
     Array.prototype.forEach.call(filtersEl.querySelectorAll(".filter"), function (b) {
       b.setAttribute("aria-pressed", b.getAttribute("data-album") === id ? "true" : "false");
     });
-    list = id === "all" ? photos : photos.filter(function (p) { return p.album === id; });
-    if (titleEl) titleEl.innerHTML = "<h2>" + escapeHtml(id === "all" ? "All photos" : albumName(id)) + "</h2><span>" + list.length + " photo" + (list.length === 1 ? "" : "s") + "</span>";
+    var inAlbum = id === "all" ? photos : photos.filter(function (p) { return p.album === id; });
+    if (currentType === "video" && !inAlbum.some(function (p) { return p.type === "video"; })) currentType = "all";
+    buildTypes();
+    list = currentType === "all" ? inAlbum : inAlbum.filter(function (p) { return (p.type || "photo") === currentType; });
+    var np = list.filter(function (p) { return p.type !== "video"; }).length, nv = list.length - np;
+    var parts = [];
+    if (np || !nv) parts.push("<span>" + np + " photo" + (np === 1 ? "" : "s") + "</span>");
+    if (nv) parts.push("<span>" + nv + " video" + (nv === 1 ? "" : "s") + "</span>");
+    if (titleEl) titleEl.innerHTML = "<h2>" + escapeHtml(id === "all" ? "All photos" : albumName(id)) + "</h2>" + parts.join('<span class="dot-sep"> · </span>');
     grid.innerHTML = "";
     shown = 0;
     renderMore();
     if (updateHash && history.replaceState) {
       var a = albums.filter(function (x) { return x.id === id; })[0];
-      history.replaceState(null, "", id === "all" ? location.pathname : "#album=" + slug(a.name));
+      var h = (id === "all" ? "" : "album=" + slug(a.name)) + (currentType !== "all" ? (id === "all" ? "" : "&") + "type=" + currentType : "");
+      history.replaceState(null, "", h ? "#" + h : location.pathname + location.search);
     }
   }
 
@@ -204,7 +232,8 @@
       a.className = "tile";
       a.href = p.full;
       a.setAttribute("data-index", i);
-      a.setAttribute("aria-label", "Open photo: " + p.alt);
+      a.setAttribute("aria-label", (p.type === "video" ? "Play video: " : "Open photo: ") + p.alt);
+      if (p.type === "video") a.classList.add("is-video");
       var img = document.createElement("img");
       img.loading = "lazy";
       img.decoding = "async";
@@ -218,6 +247,20 @@
         };
       })(p, img);
       a.appendChild(img);
+      if (p.type === "video") {
+        var play = document.createElement("span");
+        play.className = "play";
+        play.setAttribute("aria-hidden", "true");
+        play.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
+        a.appendChild(play);
+        if (p.dur) {
+          var du = document.createElement("span");
+          du.className = "dur";
+          var sec = Math.round(p.dur / 1000);
+          du.textContent = Math.floor(sec / 60) + ":" + ("0" + (sec % 60)).slice(-2);
+          a.appendChild(du);
+        }
+      }
       if (current === "all") {
         var badge = document.createElement("span");
         badge.className = "badge";
@@ -234,18 +277,33 @@
     grid.appendChild(frag);
     shown = end;
     if (moreBtn) moreBtn.hidden = shown >= list.length;
-    if (!list.length) grid.innerHTML = '<p class="gal-empty">Photos coming soon to this album ♥</p>';
+    if (!list.length) grid.innerHTML = '<p class="gal-empty">' + (currentType === "video" ? "Videos coming soon to this album ♥" : "Photos coming soon to this album ♥") + "</p>";
   }
 
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   /* ---------- Lightbox ---------- */
-  var lb = $("#lightbox"), lbImg = $("#lb-img"), lbCap = $("#lb-cap"), lbCount = $("#lb-count");
+  var lb = $("#lightbox"), lbImg = $("#lb-img"), lbCap = $("#lb-cap"), lbCount = $("#lb-count"), lbVid = $("#lb-video");
+  function stopVideo() { if (lbVid) { lbVid.removeAttribute("src"); lbVid.hidden = true; } }
   var idx = 0, lastFocus = null, touchX = null;
 
   function show(i) {
     idx = (i + list.length) % list.length;
     var p = list[idx];
+    stopVideo();
+    lbCap.textContent = p.alt;
+    lbCount.textContent = (idx + 1) + " / " + list.length;
+    if (p.type === "video" && lbVid) {
+      lbImg.hidden = true;
+      lb.classList.remove("loading");
+      var ratio = p.w && p.h ? p.w / p.h : 16 / 9;
+      lbVid.style.aspectRatio = ratio;
+      lbVid.style.width = "min(100%, calc((100vh - 190px) * " + ratio.toFixed(4) + "))";
+      lbVid.hidden = false;
+      lbVid.src = p.embed;
+      return;
+    }
+    lbImg.hidden = false;
     lb.classList.add("loading");
     lbImg.classList.add("swap");
     var pre = new Image();
@@ -261,7 +319,7 @@
     lbCap.textContent = p.alt;
     lbCount.textContent = (idx + 1) + " / " + list.length;
     // preload neighbour
-    var n = list[(idx + 1) % list.length]; if (n) { var x = new Image(); x.src = n.full; }
+    var n = list[(idx + 1) % list.length]; if (n && n.type !== "video") { var x = new Image(); x.src = n.full; }
   }
   function openLb(i) {
     lastFocus = document.activeElement;
@@ -272,6 +330,7 @@
     $(".lb-close", lb).focus();
   }
   function closeLb() {
+    stopVideo();
     lb.classList.remove("open");
     lb.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
@@ -308,6 +367,12 @@
     });
   }
   if (moreBtn) moreBtn.addEventListener("click", renderMore);
+  if (typesEl) typesEl.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-type]");
+    if (!b || b.disabled) return;
+    currentType = b.getAttribute("data-type");
+    select(current, true);
+  });
 
   /* ---------- Boot ---------- */
   function start(driveData) {
@@ -320,6 +385,8 @@
     }
     buildFilters();
     var want = (location.hash.match(/album=([^&]+)/) || [])[1];
+    var wantType = (location.hash.match(/type=(photo|video)/) || [])[1];
+    if (wantType) currentType = wantType;
     var pick = "all";
     if (want) albums.forEach(function (a) { if (slug(a.name) === decodeURIComponent(want)) pick = a.id; });
     select(pick, false);
